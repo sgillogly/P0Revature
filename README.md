@@ -1,2 +1,2 @@
-# P0Revature
+# Revature Champs Project
 Revature Project 0
