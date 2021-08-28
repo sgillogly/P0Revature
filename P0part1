@@ -1,0 +1,52 @@
+public class HelperClass {
+    public static void AddFees(List<Order> orders){
+        Set<Id> accountIds = new Set<Id>();
+        
+        for (Order ord : orders){
+            accountIds.add(orders.AccountId);
+        }
+        
+        List<Account> relevantAccounts = [SELECT TotalFees__c, (SELECT TotalPrice__c, accountID FROM Orders) FROM Account WHERE id =: accountIds];
+        for(Account currAccount : relevantAccounts){
+            currAccount.TotalFees__c = 0;
+            for(Order anOrder : currAccount.Orders){
+                currAccount.TotalFees__c += anOrder.TotalPrice__c;
+            }
+        }
+    }
+    
+    public static void newDriverOrder(){
+        
+    }
+    
+    public static void MissingContactPhone(){
+        
+    }
+
+}
+-----------------------------------------------------------------
+trigger newDriverOrder on Order (before insert, before update, before delete, after insert, after update, after delete, after undelete){
+    switch on trigger.operationType {
+        when AFTER_UPDATE{
+            HelperClass.newDriverOrder(trigger.new);
+        }
+    }
+}
+
+---------------------------------------------------------------------
+trigger MissingContactPhone on Contract (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+    switch on trigger.operationType{
+        when AFTER_UPDATE {
+        HelperClass.MissingContactPhone(trigger.new);
+        }
+    }
+    // if contact does not have a phone number in the field, the phone number on the associated account is added to the contact phone field
+}
+----------------------------------------------------------------------
+trigger FeesTrigger on Order (before insert, before update, before delete, after insert, after update, after delete, after undelete){
+    switch on trigger.operationType {
+        when AFTER_UPDATE {
+            HelperClass.AddFees(trigger.new);
+        }
+    } 
+}
